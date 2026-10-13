@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/quest", "destination": "/api/index" },
+    { "source": "/api/hiscores", "destination": "/api/index" }
+  ]
+}
