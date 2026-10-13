@@ -1,6 +1,16 @@
 {
   "rewrites": [
-    { "source": "/api/quest", "destination": "/api/index" },
-    { "source": "/api/hiscores", "destination": "/api/index" }
+    {
+      "source": "/api/ge",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/api/quest",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/api/hiscores",
+      "destination": "/api/index"
+    }
   ]
 }

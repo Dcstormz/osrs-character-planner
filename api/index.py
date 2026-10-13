@@ -41,3 +41,19 @@ def hiscores():
         return jsonify(player=player,skills=skills)
     except Exception as exc:
         return jsonify(error='Unable to retrieve Hiscores. Check the username, Jagex availability, or try again later.', detail=str(exc)[:180]), 502
+
+
+@app.get('/api/ge')
+def ge():
+    try:
+        base='https://prices.runescape.wiki/api/v1/osrs/'
+        headers={'User-Agent':'OSRSCharacterPlanner/1.1 (personal project; contact via github.com/Dcstormz/osrs-character-planner)','Accept':'application/json'}
+        def fetch(path):
+            with urlopen(Request(base+path,headers=headers),timeout=18) as response:
+                return __import__('json').load(response)
+        mapping=fetch('mapping')
+        prices=fetch('latest').get('data',{})
+        items=[{'id':x['id'],'name':x['name'],'icon':x.get('icon','')} for x in mapping if x.get('id') is not None and x.get('name')]
+        return jsonify(items=items,prices=prices)
+    except Exception as exc:
+        return jsonify(error='Unable to load GE prices from the OSRS Wiki',detail=str(exc)[:150]),502
