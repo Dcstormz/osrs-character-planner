@@ -79,6 +79,20 @@ def get_quest(title):
             'wiki':'https://oldschool.runescape.wiki/w/'+quote(canonical.replace(' ','_')),
             'note':'Skill requirements from '+source+'. Verify quest prerequisites, boosts, and special conditions on the wiki.'}
 
+
+
+def get_ge():
+    """OSRS Wiki price mapping and the most recent observed trade prices."""
+    base = 'https://prices.runescape.wiki/api/v1/osrs/'
+    headers = {'User-Agent': 'OSRSCharacterPlanner/1.2 (personal project; contact via github.com/Dcstormz/osrs-character-planner)', 'Accept': 'application/json'}
+    def load(path):
+        with urlopen(Request(base + path, headers=headers), timeout=18) as response:
+            return json.load(response)
+    mapping = load('mapping')
+    prices = load('latest').get('data', {})
+    items = [{'id':x['id'],'name':x['name'],'icon':x.get('icon','')} for x in mapping if x.get('id') is not None and x.get('name')]
+    return {'items':items,'prices':prices}
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self,*args,**kwargs): super().__init__(*args,directory=str(ROOT),**kwargs)
     def do_GET(self):
@@ -88,6 +102,9 @@ class Handler(SimpleHTTPRequestHandler):
             if not title or len(title)>100:return self.send_json({'error':'Enter a valid quest name'},400)
             try:return self.send_json(get_quest(title))
             except Exception as exc:return self.send_json({'error':'Could not retrieve quest requirements from the wiki','detail':str(exc)[:160]},502)
+        if url.path == '/api/ge':
+            try: return self.send_json(get_ge())
+            except Exception as exc: return self.send_json({'error':'Unable to load GE prices from the OSRS Wiki','detail':str(exc)[:150]},502)
         if url.path != '/api/hiscores': return super().do_GET()
         player=parse_qs(url.query).get('player',['dcstorms'])[0].strip()
         if not player or len(player)>12 or not all(c.isalnum() or c in ' _-' for c in player): return self.send_json({'error':'Invalid OSRS username'},400)
